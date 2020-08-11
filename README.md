@@ -45,7 +45,6 @@ command = "/usr/local/bin/check-diff -- uname -a"
 command = "/usr/local/bin/check-diff -- cat /etc/passwd"
 ```
 
-
 ## Install
 
-Please download release page.
+Please download release page or `mkr plugin install kazeburo/check-diff`.
