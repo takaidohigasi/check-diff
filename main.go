@@ -40,18 +40,8 @@ func runCmd(curFile *os.File, opts cmdOpts) error {
 	return nil
 }
 
-func runCopy(from string, to string) error {
-	cmd := exec.Command("cp", from, to)
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-	err := cmd.Wait()
-	if err != nil {
-		return fmt.Errorf("%s - %s", err, stderr.String())
-	}
-	return nil
+func calcDiff(diffCmd, from, to string) ([]byte, error) {
+	return exec.Command(diffCmd, "-U", "1", from, to).Output()
 }
 
 func fileExists(filename string) bool {
@@ -91,7 +81,7 @@ func checkDiff(opts cmdOpts) *checkers.Checker {
 	}
 
 	if !fileExists(prevPath) {
-		err = runCopy(curFile.Name(), prevPath)
+		err = os.Rename(curFile.Name(), prevPath)
 		if err != nil {
 			return checkers.Critical(err.Error())
 		}
@@ -105,8 +95,8 @@ func checkDiff(opts cmdOpts) *checkers.Checker {
 	}
 
 	// diff
-	diffOut, diffError := exec.Command(diffCmd, "-U", "1", prevPath, curFile.Name()).Output()
-	err = runCopy(curFile.Name(), prevPath)
+	diffOut, diffError := calcDiff(diffCmd, prevPath, curFile.Name())
+	err = os.Rename(curFile.Name(), prevPath)
 	if err != nil {
 		return checkers.Critical(err.Error())
 	}
