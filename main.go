@@ -23,6 +23,7 @@ type cmdOpts struct {
 	OptArgs       []string
 	OptCommand    string
 	OptIdentifier string `long:"identifier" description:"indetify a file store the command result with given string"`
+	OptWarn       bool   `long:"warning" description:"Set the error level to warning"`
 }
 
 func runCmd(curFile *os.File, opts cmdOpts) error {
@@ -134,6 +135,9 @@ func checkDiff(opts cmdOpts) *checkers.Checker {
 			msg = fmt.Sprintf("found difference: ```%s...```\n", diffRetString[0:512])
 		} else {
 			msg = fmt.Sprintf("found difference: ```%s```\n", diffRetString)
+		}
+		if opts.OptWarn {
+			return checkers.Warning(msg)
 		}
 		return checkers.Critical(msg)
 	}
